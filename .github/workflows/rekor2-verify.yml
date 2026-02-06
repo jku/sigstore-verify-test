@@ -1,0 +1,26 @@
+name: Test sigstore client with rekor2 bundles
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  sign:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          cache: "pip"
+
+      - name: Create a bundle with rekor2
+        run: |
+          touch artifact
+          python -m pip install sigstore
+          python -m sigstore sign artifact 
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bundle
+          path: artifact.sigstore.json
