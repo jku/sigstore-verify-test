@@ -31,4 +31,31 @@ jobs:
           name: bundle
           path: artifact.sigstore.json
 
+  verify-rekor2:
+    runs-on: ubuntu-latest
+    needs: sign
+    continue-on-error: true
+    strategy:
+      matrix:
+        sigstore-python-version: [4.2.0, 4.1.0, 4.0.0, 3.6.7, 3.6.6, 3.6.5, 3.5.6, 3.5.4]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: bundle
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          cache: "pip"
+
+      - name: Verify the rekor2 bundle
+        run: |
+          touch artifact
+          python -m pip install sigstore==${{ matrix.sigstore-python-version }}
+          python -m sigstore verify github \
+            --cert-identity "https://github.com/jku/sigstore-verify-test/.github/workflows/rekor2-verify.yml@refs/heads/main" \
+            artifact
 
