@@ -23,13 +23,20 @@ jobs:
         run: |
           touch artifact
           python -m pip install sigstore
-          # use prod services, but rekor 2
+          # Sign artifact with production sigstore.dev, but use rekor 2
           python -m sigstore --trust-config trust-config-with-rekor2-signing.json sign artifact
+
+          # sign an attestation with production sigstore.dev, but use rekor 2
+          sigstore --trust-config trust-config-with-rekor2-signing.json attest \
+              --predicate-type "https://slsa.dev/provenance/v1" \
+              --predicate "slsa_predicate_v1_0.json" \
+              --bundle attestation.sigstore.json \
+              artifact
 
       - uses: actions/upload-artifact@v4
         with:
-          name: bundle
-          path: artifact.sigstore.json
+          name: bundles
+          path: *.sigstore.json
 
   sigstore-python-verify-rekor2:
     runs-on: ubuntu-latest
@@ -38,10 +45,11 @@ jobs:
     strategy:
       matrix:
         sigstore-python-version: [4.2.0, 4.1.0, 4.0.0, 3.6.7, 3.6.6, 3.6.5, 3.5.6, 3.5.4]
+        bundle: [artifact, attestation]
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: bundle
+          name: bundles
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
@@ -53,7 +61,7 @@ jobs:
           python -m pip install sigstore==${{ matrix.sigstore-python-version }}
           python -m sigstore verify github \
             --cert-identity "https://github.com/jku/sigstore-verify-test/.github/workflows/rekor2-verify.yml@refs/heads/main" \
-            artifact
+            ${{ matrix.bundle }}.sigstore.json
 
   cosign-verify-rekor2:
     runs-on: ubuntu-latest
@@ -63,10 +71,11 @@ jobs:
       matrix:
         cosign-version: [2.2.0, 2.2.1, 2.2.2, 2.2.3, 2.2.4, 2.3.0, 2.4.0, 2.4.1, 2.4.2, 2.4.3, 2.5.0, 2.5.0, 2.5.1, 2.5.2, 2.5.3, 2.6.0, 2.6.1, 2.6.2, 3.0.1, 3.0.2, 3.0.3, 3.0.4]
         extra-flags: ["", "--use-signed-timestamps"]
+        bundle: [artifact, attestation]
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: bundle
+          name: bundles
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v4.0.0
@@ -79,6 +88,6 @@ jobs:
           cosign verify-blob \
               --certificate-identity https://github.com/jku/sigstore-verify-test/.github/workflows/rekor2-verify.yml@refs/heads/main \
               --certificate-oidc-issuer  https://token.actions.githubusercontent.com \
-              --bundle artifact.sigstore.json \
+              --bundle ${{ matrix.bundle }}.sigstore.json \
               ${{ matrix.extra-flags }} \
               artifact
