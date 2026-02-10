@@ -61,7 +61,8 @@ jobs:
           python -m pip install sigstore==${{ matrix.sigstore-python-version }}
           python -m sigstore verify github \
             --cert-identity "https://github.com/jku/sigstore-verify-test/.github/workflows/rekor2-verify.yml@refs/heads/main" \
-            ${{ matrix.bundle }}.sigstore.json
+            --bundle ${{ matrix.bundle }}.sigstore.json \
+            artifact
 
   cosign-verify-rekor2:
     runs-on: ubuntu-latest
