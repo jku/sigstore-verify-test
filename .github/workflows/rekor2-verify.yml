@@ -78,5 +78,5 @@ jobs:
           cosign verify-blob \
               --certificate-identity https://github.com/jku/sigstore-verify-test/.github/workflows/rekor2-verify.yml@refs/heads/main \
               --certificate-oidc-issuer  https://token.actions.githubusercontent.com \
-              --bundle artifact.sigstore.json
+              --bundle artifact.sigstore.json \
               artifact
