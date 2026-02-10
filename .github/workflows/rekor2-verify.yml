@@ -70,7 +70,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v4.0.0
         with:
-          cosign-release: ${{ matrix.cosign-version }}
+          cosign-release: v${{ matrix.cosign-version }}
 
       - name: Verify the rekor2 bundle
         run: |
