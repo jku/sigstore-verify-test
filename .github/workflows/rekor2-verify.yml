@@ -225,6 +225,7 @@ jobs:
           touch artifact
 
           ~/go/bin/sigstore-go-verification \
+              -tufRootURL https://tuf-repo-cdn.sigstore.dev/ \
               -expectedSAN https://github.com/jku/sigstore-verify-test/.github/workflows/rekor2-verify.yml@refs/heads/main \
               -expectedIssuer https://token.actions.githubusercontent.com \
               -artifact artifact \
