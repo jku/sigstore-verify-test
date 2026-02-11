@@ -116,7 +116,7 @@ jobs:
         run: |
           touch artifact
           sigstore verify \
-              --certificate-identity-uri $IDENTITY \
+              --certificate-identity-uri https://github.com/jku/sigstore-verify-test/.github/workflows/rekor2-verify.yml@refs/heads/main \
               --certificate-issuer https://token.actions.githubusercontent.com \
               --blob-file=artifact \
               ${{ matrix.bundle }}.sigstore.json
