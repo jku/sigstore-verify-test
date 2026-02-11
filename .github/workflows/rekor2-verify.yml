@@ -120,3 +120,48 @@ jobs:
               --certificate-issuer https://token.actions.githubusercontent.com \
               --blob-file=artifact \
               ${{ matrix.bundle }}.sigstore.json
+
+  verify-sigstore-java:
+    runs-on: ubuntu-latest
+    needs: [sign]
+    continue-on-error: true
+    strategy:
+      matrix:
+        sigstore-java-version: [1.0.0, 1.1.0, 1.2.0, 1.3.0, 2.0.0]
+        bundle: [artifact, attestation]
+    steps:
+      - name: Set up JDK
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          java-version: 21
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: "sigstore/sigstore-java"
+          fetch-tags: true
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Build cli from tag
+        run: |
+          git checkout v${{ matrix.sigstore-java-version }}
+          ./gradlew :sigstore-cli:installDist -x test -x check
+
+      - name: Download bundle to verify
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: bundle
+
+      - name: Test published repository with sigstore-java
+        run: |
+          touch artifact
+
+          sigstore-cli/build/install/sigstore-cli/bin/sigstore-cli verify-bundle \
+              --bundle ${{ matrix.bundle }}.sigstore.json \
+              --certificate-identity https://github.com/jku/sigstore-verify-test/.github/workflows/rekor2-verify.yml@refs/heads/main \
+              --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+              artifact
