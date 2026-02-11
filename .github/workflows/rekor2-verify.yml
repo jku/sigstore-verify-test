@@ -171,7 +171,8 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        sigstore-ruby-version: [0.2.0, 0.2.1, 0.2.2]
+        # these are really sigstore-cli versions
+        sigstore-ruby-version: [0.2.1, 0.2.2]
         bundle: [artifact, attestation]
     steps:
       - name: Set up Ruby
