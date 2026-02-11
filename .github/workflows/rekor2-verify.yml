@@ -100,7 +100,7 @@ jobs:
     strategy:
       matrix:
         # note that sigstore-js does not have versions. this is really the sigstore/cli version
-        sigstore-js-version: [0.9.0, 0.8.2, 0.8.1, 0.8.0. 0.7.1, 0.7.0]
+        sigstore-js-version: [0.7.0, 0.7.1, 0.8.0, 0.8.1, 0.8.2, 0.9.0]
         bundle: [artifact, attestation]
     steps:
       - uses: actions/download-artifact@v4
