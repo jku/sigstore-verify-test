@@ -133,7 +133,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
-          java-version: 21
+          java-version: 17
           distribution: 'temurin'
 
       - name: Setup Gradle
@@ -154,7 +154,7 @@ jobs:
       - name: Download bundle to verify
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: bundle
+          name: bundles
 
       - name: Test published repository with sigstore-java
         run: |
