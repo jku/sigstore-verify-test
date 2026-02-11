@@ -133,7 +133,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
-          java-version: 17
+          java-version: ${{ startsWith(matrix.sigstore-java-version, '1.') && '17' || '21' }}
           distribution: 'temurin'
 
       - name: Setup Gradle
