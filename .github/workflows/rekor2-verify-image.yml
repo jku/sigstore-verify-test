@@ -22,16 +22,24 @@ jobs:
 
       - name: Push image to ttl.sh
         run: |
-          IMAGE_NAME="ttl.sh/sigstore-verify-test-${{ github.run_id }}:1h"
+          V2_IMAGE_NAME="ttl.sh/sigstore-verify-test-${{ github.run_id }}-rekor2:1h"
+          V1_IMAGE_NAME="ttl.sh/sigstore-verify-test-${{ github.run_id }}-rekor1:1h"
 
           docker pull alpine:latest
-          docker tag alpine:latest $IMAGE_NAME
-          docker push $IMAGE_NAME
+          docker tag alpine:latest $V2_IMAGE_NAME
+          docker tag alpine:latest $V1_IMAGE_NAME
+          docker push $V2_IMAGE_NAME
+          docker push $V1_IMAGE_NAME
 
       - name: Sign image with cosign, using rekor2
         run: |
-          IMAGE_NAME="ttl.sh/sigstore-verify-test-${{ github.run_id }}:1h"
-          cosign sign --signing-config rekor2-signing-config.json $IMAGE_NAME
+          V2_IMAGE_NAME="ttl.sh/sigstore-verify-test-${{ github.run_id }}-rekor2:1h"
+          cosign sign --signing-config rekor2-signing-config.json $V2_IMAGE_NAME
+
+      - name: Sign image with cosign, using rekor1
+        run: |
+          V1_IMAGE_NAME="ttl.sh/sigstore-verify-test-${{ github.run_id }}-rekor1:1h"
+          cosign sign $V1_IMAGE_NAME
 
   verify-cosign:
     runs-on: ubuntu-latest
@@ -41,6 +49,7 @@ jobs:
       matrix:
         cosign-version: [2.2.0, 2.2.1, 2.2.2, 2.2.3, 2.2.4, 2.3.0, 2.4.0, 2.4.1, 2.4.2, 2.4.3, 2.5.0, 2.5.0, 2.5.1, 2.5.2, 2.5.3, 2.6.0, 2.6.1, 2.6.2, 3.0.1, 3.0.2, 3.0.3, 3.0.4]
         extra-flags: ["", "--use-signed-timestamps"]
+        rekor-version: ["1", "2"]
     steps:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v4.0.0
@@ -49,7 +58,7 @@ jobs:
 
       - name: Verify with cosign
         run: |
-          IMAGE_NAME="ttl.sh/sigstore-verify-test-${{ github.run_id }}:1h"
+          IMAGE_NAME="ttl.sh/sigstore-verify-test-${{ github.run_id }}-rekor${{matrix.rekor-version}}:1h"
 
           cosign verify $IMAGE_NAME \
               --certificate-identity https://github.com/jku/sigstore-verify-test/.github/workflows/rekor2-verify-image.yml@refs/heads/main \
@@ -57,7 +66,8 @@ jobs:
               ${{ matrix.extra-flags }}
 
       - name: Double check that entry is rekor2
+        if: matrix.rekor-version == '2'
         run: |
-          IMAGE_NAME="ttl.sh/sigstore-verify-test-${{ github.run_id }}:1h"
+          IMAGE_NAME="ttl.sh/sigstore-verify-test-${{ github.run_id }}-rekor${{matrix.rekor-version}}:1h"
           # this fails on 3.0.1 and 3.0.2 likely because it uses wrong registry referrer mode
           cosign download signature $IMAGE_NAME | grep "{\"kind\":\"dsse\",\"version\":\"0.0.2\"}"
