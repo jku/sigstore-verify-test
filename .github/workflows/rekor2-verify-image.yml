@@ -60,4 +60,4 @@ jobs:
         run: |
           IMAGE_NAME="ttl.sh/sigstore-verify-test-${{ github.run_id }}:1h"
 
-          cosign download signature $IMAGE_NAME | grep "{\"kind\":\"dsse\",\"version\":\"0.0.2\"}"
+          cosign download signature --registry-referrers-mode=oci $IMAGE_NAME | grep "{\"kind\":\"dsse\",\"version\":\"0.0.2\"}"
