@@ -40,15 +40,21 @@ jobs:
 
       - name: Sign images with cosign
         run: |
-          cosign sign --signing-config rekor2-signing-config.json \
+          cosign sign \
+            --signing-config rekor2-signing-config.json \
             "ttl.sh/sigstore-verify-test-${{ github.run_id }}-rekor2-new-bundle:1h"
 
-          cosign sign --signing-config rekor2-signing-config.json \
+          cosign sign \
+            --signing-config rekor2-signing-config.json \
+            --new-bundle-format=false \
             "ttl.sh/sigstore-verify-test-${{ github.run_id }}-rekor2-old-bundle:1h"
 
-          cosign sign "ttl.sh/sigstore-verify-test-${{ github.run_id }}-rekor1-new-bundle:1h"
+          cosign sign \
+            "ttl.sh/sigstore-verify-test-${{ github.run_id }}-rekor1-new-bundle:1h"
 
-          cosign sign "ttl.sh/sigstore-verify-test-${{ github.run_id }}-rekor1-old-bundle:1h"
+          cosign sign \
+            --new-bundle-format=false \
+            "ttl.sh/sigstore-verify-test-${{ github.run_id }}-rekor1-old-bundle:1h"
 
   verify-cosign:
     runs-on: ubuntu-latest
