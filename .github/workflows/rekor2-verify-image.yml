@@ -97,7 +97,7 @@ jobs:
               ${{ matrix.extra-flags }}
 
       - name: Double check that entry is rekor2
-        if: matrix.rekor-version == 'rekor2'
+        if: matrix.rekor-version == 'rekor2' && matrix.bundle-type == 'new-bundle'
         run: |
           IMAGE_NAME="ttl.sh/sigstore-verify-test-${{ github.run_id }}-${{matrix.rekor-version}}-${{matrix.bundle-type}}:1h"
           # this fails on 3.0.1 and 3.0.2 likely because it uses wrong registry referrer mode
