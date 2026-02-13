@@ -67,7 +67,7 @@ jobs:
       - name: Sign images with an old cosign
         run: |
           # this should produce an "old bundle" format
-          cosign sign \
+          cosign sign --yes \
             "ttl.sh/sigstore-verify-test-${{ github.run_id }}-rekor1-old-bundle:1h"
 
   verify-cosign:
